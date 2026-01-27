@@ -1,0 +1,9 @@
+#output {
+  font-family: monospace;
+  font-weight: bold;
+  color: rgb(196, 204, 204);
+  background-color: #0d1323;
+  font-size: large;
+  text-align: left;
+  padding: 5px;
+}
