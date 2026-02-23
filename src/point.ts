@@ -1,31 +1,31 @@
 /**
- * Represents an immutable point in 2D space.
+ * Represents a 2D point in the game world
  */
 export class Point {
-  private readonly xcoord: number;
-  private readonly ycoord: number;
+    private _x: number;
+    private _y: number;
 
-  /**
-   * Creates a new Point.
-   * @param x The x-coordinate
-   * @param y The y-coordinate
-   */
-  constructor(x: number, y: number) {
-    this.xcoord = x;
-    this.ycoord = y;
-  }
+    /**
+     * Creates a new Point
+     * @param x - The x-coordinate
+     * @param y - The y-coordinate
+     */
+    constructor(x: number, y: number) {
+        this._x = x;
+        this._y = y;
+    }
 
-  /**
-   * Gets the x-coordinate.
-   */
-  get x(): number {
-    return this.xcoord;
-  }
+    /**
+     * Gets the x-coordinate
+     */
+    get x(): number {
+        return this._x;
+    }
 
-  /**
-   * Gets the y-coordinate.
-   */
-  get y(): number {
-    return this.ycoord;
-  }
+    /**
+     * Gets the y-coordinate
+     */
+    get y(): number {
+        return this._y;
+    }
 }
