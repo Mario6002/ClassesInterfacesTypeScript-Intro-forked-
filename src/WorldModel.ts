@@ -1,50 +1,56 @@
-import { Snake } from './snake';
+import { Snake } from './Snake';
+import { IWorldView } from './IWorldView';
 
 /**
- * Represents the game world containing all snakes
+ * Represents the game world containing the snake and managing game state
  */
 export class WorldModel {
-    private _width: number;
-    private _height: number;
-    private _snakes: Snake[];
+    /** The snake in the world */
+    private snake: Snake;
+    
+    /** Width of the world in grid units */
+    public readonly width: number = 10;
+    
+    /** Height of the world in grid units */
+    public readonly height: number = 10;
+    
+    /** The view associated with this world model */
+    private worldView: IWorldView | null = null;
 
     /**
      * Creates a new WorldModel
-     * @param width - Width of the world
-     * @param height - Height of the world
-     * @param snakes - Initial snakes in the world
+     * @param snake - The snake to place in the world
      */
-    constructor(width: number, height: number, snakes: Snake[] = []) {
-        this._width = width;
-        this._height = height;
-        this._snakes = snakes;
-    }
-
-    /**
-     * Gets the world width
-     */
-    get width(): number {
-        return this._width;
-    }
-
-    /**
-     * Gets the world height
-     */
-    get height(): number {
-        return this._height;
-    }
-
-    /**
-     * Gets all snakes in the world
-     */
-    get snakes(): Snake[] {
-        return [...this._snakes];
+    constructor(snake: Snake) {
+        this.snake = snake;
     }
 
     /**
      * Updates the world state
+     * Moves the snake and refreshes the view if one exists
      */
     update(): void {
-        this._snakes.forEach(snake => snake.move());
+        this.snake.move();
+        
+        // Update the view if it exists
+        if (this.worldView !== null) {
+            this.worldView.display(this);
+        }
+    }
+
+    /**
+     * Gets the current snake
+     * @returns The snake object
+     */
+    getSnake(): Snake {
+        return this.snake;
+    }
+
+    /**
+     * Sets the view for this world model
+     * @param view - The IWorldView implementation to use for rendering
+     */
+    setView(view: IWorldView): void {
+        this.worldView = view;
     }
 }
