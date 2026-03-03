@@ -1,20 +1,40 @@
-import { Snake } from "./Snake";
+import React, { useEffect } from 'react';
+import { Snake } from './Snake';
+import { WorldModel } from './WorldModel';
+import { CanvasWorldView } from './CanvasWorldView';
+import './App.css';
 
 function App() {
-  const snake1 = new Snake();
-  snake1.move(5);      // position should be 5
-  snake1.turn();       // now facing backward
-  snake1.move(2);      // position should be 3
+  useEffect(() => {
+    // Create a snake
+    const snake = new Snake();
+    
+    // Create the world model with the snake
+    const worldModel = new WorldModel(snake);
+    
+    // Create a canvas view with scaling factor of 50 (each grid unit = 50x50 pixels)
+    const canvasView = new CanvasWorldView(50);
+    
+    // Set the view for the world model
+    worldModel.setView(canvasView);
+    
+    // Update the world model to trigger initial rendering
+    worldModel.update();
+    
+    // Optional: Set up animation loop for continuous updates
+    const intervalId = setInterval(() => {
+      worldModel.update();
+    }, 500); // Update every 500ms
+    
+    // Cleanup on unmount
+    return () => clearInterval(intervalId);
+  }, []);
 
-  const snake2 = new Snake();
-  snake2.turn();       // backward
-  snake2.move(10);     // position should be -10
-
-  console.log("Snake 1 position:", snake1.position); // 3
-  console.log("Snake 2 position:", snake2.position); // -10
-
-  return <div>Check the console for Snake positions 🐍</div>;
+  return (
+    <div className="App">
+      <h1>Snake Game</h1>
+    </div>
+  );
 }
 
 export default App;
-
