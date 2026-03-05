@@ -9,10 +9,10 @@ export class WorldModel {
     private snake: Snake;
     
     /** Width of the world in grid units */
-    public readonly width: number = 10;
+    public readonly width: number = 20; // Increased for better gameplay
     
     /** Height of the world in grid units */
-    public readonly height: number = 10;
+    public readonly height: number = 20; // Increased for better gameplay
     
     /** The view associated with this world model */
     private worldView: IWorldView | null = null;
