@@ -1,38 +1,64 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Snake } from './Snake';
 import { WorldModel } from './WorldModel';
 import { CanvasWorldView } from './CanvasWorldView';
+import { SnakeController } from './SnakeController';
+import { LRKeyInputHandler } from './LRKeyInputHandler';
+import { HumanPlayer } from './HumanPlayer';
+import { AvoidWallsPlayer } from './AvoidWallsPlayer';
+import { GameController } from './GameController';
 import './App.css';
 
 function App() {
+  const gameControllerRef = useRef<GameController | null>(null);
+  const inputHandlerRef = useRef<LRKeyInputHandler | null>(null);
+
   useEffect(() => {
-    // Create a snake
-    const snake = new Snake();
+    // Create snakes for both players
+    const snake1 = new Snake();
+    const snake2 = new Snake(); // Second snake for AI player
     
-    // Create the world model with the snake
-    const worldModel = new WorldModel(snake);
+    // Create world model
+    const worldModel = new WorldModel(snake1);
     
-    // Create a canvas view with scaling factor of 50 (each grid unit = 50x50 pixels)
-    const canvasView = new CanvasWorldView(50);
-    
-    // Set the view for the world model
+    // Create canvas view
+    const canvasView = new CanvasWorldView(30);
     worldModel.setView(canvasView);
     
-    // Update the world model to trigger initial rendering
-    worldModel.update();
+    // Create snake controllers
+    const controller1 = new SnakeController(worldModel, snake1);
+    const controller2 = new SnakeController(worldModel, snake2);
     
-    // Optional: Set up animation loop for continuous updates
-    const intervalId = setInterval(() => {
-      worldModel.update();
-    }, 500); // Update every 500ms
+    // Create input handler for human player
+    const inputHandler = new LRKeyInputHandler();
+    inputHandlerRef.current = inputHandler;
+    
+    // Create players
+    const humanPlayer = new HumanPlayer(controller1, inputHandler);
+    const aiPlayer = new AvoidWallsPlayer(controller2);
+    
+    // Create and configure game controller
+    const gameController = new GameController(worldModel);
+    gameController.setPlayer1(humanPlayer);
+    gameController.setPlayer2(aiPlayer);
+    gameControllerRef.current = gameController;
+    
+    // Start the game
+    gameController.run();
     
     // Cleanup on unmount
-    return () => clearInterval(intervalId);
+    return () => {
+      gameController.stop();
+      if (inputHandlerRef.current) {
+        inputHandlerRef.current.destroy();
+      }
+    };
   }, []);
 
   return (
     <div className="App">
-      <h1>Snake Game</h1>
+      <h1>Snake Game - Human vs AI</h1>
+      <p>Use left and right arrow keys to control the green snake</p>
     </div>
   );
 }
