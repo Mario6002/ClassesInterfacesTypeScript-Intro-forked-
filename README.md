@@ -19,7 +19,7 @@ This project was created to practice **object-oriented programming**, **game loo
 
 ## Technologies Used
 
-- Java
+- Java/TypeScript
 - Object-Oriented Programming (OOP)
 - Event Handling
 - Game Loop Logic
