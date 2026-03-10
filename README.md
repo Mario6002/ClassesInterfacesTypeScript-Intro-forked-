@@ -1,46 +1,54 @@
-# Getting Started with Create React App
+# Snake Game 🐍
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A classic Snake game built using Java. The game allows a player to control a snake, collect food, and grow in length while avoiding collisions with the walls or itself.
 
-## Available Scripts
+This project was created to practice **object-oriented programming**, **game loops**, and **user input handling**.
 
-In the project directory, you can run:
+---
 
-### `npm start`
+## Features
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- Player-controlled snake movement
+- Real-time keyboard input
+- Food generation system
+- Snake grows after eating food
+- Collision detection with walls and snake body
+- Game over screen when the snake crashes
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+---
 
-### `npm test`
+## Technologies Used
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- Java
+- Object-Oriented Programming (OOP)
+- Event Handling
+- Game Loop Logic
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## How to Play
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+1. Run the program.
+2. Use the arrow keys to control the snake.
+3. Eat the food that appears on the screen.
+4. Each food item increases the snake's length.
+5. Avoid hitting:
+   - The walls
+   - Your own snake body
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+If the snake collides with either, the game ends.
 
-### `npm run eject`
+---
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## Controls
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+| Key | Action |
+|----|------|
+| ↑ | Move Up |
+| ↓ | Move Down |
+| ← | Move Left |
+| → | Move Right |
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+---
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Project Structure
