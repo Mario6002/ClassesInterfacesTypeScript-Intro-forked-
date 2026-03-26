@@ -1,9 +1,10 @@
 import { IWorldView } from './IWorldView';
 import { WorldModel } from './WorldModel';
+import { Snake } from './Snake';
 
 /**
  * Canvas-based implementation of the World View
- * Renders the Snake game using HTML5 Canvas
+ * Renders multiple snakes using HTML5 Canvas
  */
 export class CanvasWorldView implements IWorldView {
     /** Number of pixels per grid unit */
@@ -35,20 +36,59 @@ export class CanvasWorldView implements IWorldView {
         this.worldCanvas.width = model.width * this.scalingFactor;
         this.worldCanvas.height = model.height * this.scalingFactor;
 
-        // Clear the canvas
+        // Clear the canvas with a white background
         this.context.fillStyle = "white";
         this.context.fillRect(0, 0, this.worldCanvas.width, this.worldCanvas.height);
 
-        // Get the snake from the model
-        const snake = model.getSnake();
+        // Get all snakes from the model
+        const snakes = model.getAllSnakes();
         
-        // Draw the snake's head
-        this.context.fillStyle = "green";
-        this.context.fillRect(
-            snake.getHeadPosition().x * this.scalingFactor,
-            snake.getHeadPosition().y * this.scalingFactor,
-            this.scalingFactor,
-            this.scalingFactor
-        );
+        // Draw each snake
+        snakes.forEach((snake, index) => {
+            // Different colors for different snakes
+            const colors = ["green", "blue", "red", "orange", "purple"];
+            const snakeColor = colors[index % colors.length];
+            
+            // Draw each part of the snake
+            const parts = snake.getAllParts();
+            parts.forEach((part, partIndex) => {
+                // Head is slightly darker
+                const color = partIndex === 0 ? this.darkenColor(snakeColor) : snakeColor;
+                
+                this.context.fillStyle = color;
+                this.context.fillRect(
+                    part.x * this.scalingFactor,
+                    part.y * this.scalingFactor,
+                    this.scalingFactor,
+                    this.scalingFactor
+                );
+                
+                // Add a border to each segment for better visibility
+                this.context.strokeStyle = "black";
+                this.context.strokeRect(
+                    part.x * this.scalingFactor,
+                    part.y * this.scalingFactor,
+                    this.scalingFactor,
+                    this.scalingFactor
+                );
+            });
+        });
+    }
+    
+    /**
+     * Darkens a color for the snake's head
+     * @param color - The base color
+     * @returns Darkened color
+     */
+    private darkenColor(color: string): string {
+        // Simple color darkening - in production you might want a more robust solution
+        switch(color) {
+            case "green": return "darkgreen";
+            case "blue": return "darkblue";
+            case "red": return "darkred";
+            case "orange": return "darkorange";
+            case "purple": return "indigo";
+            default: return color;
+        }
     }
 }
