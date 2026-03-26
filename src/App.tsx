@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { Point } from './Point';
 import { Snake } from './Snake';
 import { WorldModel } from './WorldModel';
 import { CanvasWorldView } from './CanvasWorldView';
@@ -14,16 +15,22 @@ function App() {
   const inputHandlerRef = useRef<LRKeyInputHandler | null>(null);
 
   useEffect(() => {
-    // Create snakes for both players
-    const snake1 = new Snake();
-    const snake2 = new Snake(); // Second snake for AI player
+    // Create world model (no parameters now)
+    const worldModel = new WorldModel();
     
-    // Create world model
-    const worldModel = new WorldModel(snake1);
+    // Create multiple snakes
+    const snake1 = new Snake(new Point(5, 10), 3); // Green snake
+    const snake2 = new Snake(new Point(15, 10), 4); // Blue snake (AI)
+    const snake3 = new Snake(new Point(10, 5), 3); // Red snake (optional)
+    
+    // Add snakes to world
+    worldModel.addSnake(snake1);
+    worldModel.addSnake(snake2);
+    worldModel.addSnake(snake3);
     
     // Create canvas view
     const canvasView = new CanvasWorldView(30);
-    worldModel.setView(canvasView);
+    worldModel.addView(canvasView);
     
     // Create snake controllers
     const controller1 = new SnakeController(worldModel, snake1);
@@ -57,8 +64,9 @@ function App() {
 
   return (
     <div className="App">
-      <h1>Snake Game - Human vs AI</h1>
+      <h1>Snake Game - Multiple Snakes!</h1>
       <p>Use left and right arrow keys to control the green snake</p>
+      <p>Watch the AI snakes (blue) move automatically</p>
     </div>
   );
 }
