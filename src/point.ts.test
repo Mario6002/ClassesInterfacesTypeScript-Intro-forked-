@@ -1,0 +1,33 @@
+import { Point } from './Point';
+
+describe('Point', () => {
+    test('constructor sets x and y correctly', () => {
+        const point = new Point(5, 10);
+        expect(point.x).toBe(5);
+        expect(point.y).toBe(10);
+    });
+
+    test('equals returns true for points with same coordinates', () => {
+        const point1 = new Point(3, 7);
+        const point2 = new Point(3, 7);
+        expect(point1.equals(point2)).toBe(true);
+    });
+
+    test('equals returns false for points with different coordinates', () => {
+        const point1 = new Point(3, 7);
+        const point2 = new Point(4, 7);
+        const point3 = new Point(3, 8);
+        
+        expect(point1.equals(point2)).toBe(false);
+        expect(point1.equals(point3)).toBe(false);
+    });
+
+    test('equals returns false for points with different references but same values', () => {
+        const point1 = new Point(1, 2);
+        const point2 = new Point(1, 2);
+        
+        // Should not use reference equality
+        expect(point1 === point2).toBe(false);
+        expect(point1.equals(point2)).toBe(true);
+    });
+});
