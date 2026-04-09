@@ -1,10 +1,13 @@
 import { Point } from './Point';
 import { Direction } from './Direction';
+import { IActor } from './IActor';
+import { ICollidable } from './ICollidable';
 
 /**
  * Represents a snake in the game with multiple body parts
+ * Implements ICollidable for collision detection
  */
-export class Snake {
+export class Snake implements ICollidable {
     /** Array of points representing each part of the snake (head first, tail last) */
     private currentParts: Point[];
     
@@ -16,6 +19,9 @@ export class Snake {
     
     /** Length of the snake (number of parts) */
     private size: number;
+    
+    /** Whether the snake is currently active/alive */
+    private isCurrentlyActive: boolean;
 
     /**
      * Creates a new Snake
@@ -27,6 +33,7 @@ export class Snake {
         this.size = size;
         this.currentParts = [];
         this.direction = Direction.Right;
+        this.isCurrentlyActive = true;
         
         // Initialize snake parts
         // Start with head at startPosition
@@ -60,6 +67,20 @@ export class Snake {
      */
     getDirection(): Direction {
         return this.direction;
+    }
+
+    /**
+     * Gets whether the snake is active/alive
+     */
+    get isActive(): boolean {
+        return this.isCurrentlyActive;
+    }
+
+    /**
+     * Gets the type identifier for this actor
+     */
+    get type(): string {
+        return "snake";
     }
 
     /**
@@ -135,34 +156,84 @@ export class Snake {
     }
 
     /**
-     * Checks if this snake collides with another snake
-     * @param otherSnake - The snake to check collision with
-     * @returns True if this snake's head collides with any part of the other snake
+     * Updates the snake (calls move)
      */
-    didCollide(otherSnake: Snake): boolean {
-        const head = this.getHeadPosition();
-        
-        // Check collision with all parts of the other snake
-        const otherParts = otherSnake.getAllParts();
-        
-        for (const part of otherParts) {
-            if (head.equals(part)) {
-                return true;
-            }
-        }
-        
-        return false;
+    update(): void {
+        this.move();
     }
 
     /**
-     * Checks if this snake collides with itself
-     * @returns True if head collides with any tail part
+     * Kills the snake (sets inactive)
      */
-    didCollideWithSelf(): boolean {
-        const head = this.getHeadPosition();
-        const tailParts = this.currentParts.slice(1); // All parts except head
+    die(): void {
+        this.isCurrentlyActive = false;
+    }
+
+    /**
+     * Grows the snake by adding a new segment at the tail
+     * The new segment is placed adjacent to the current tail
+     */
+    grow(): void {
+        const tail = this.currentParts[this.currentParts.length - 1];
+        let newSegment: Point;
         
-        for (const part of tailParts) {
+        // Determine direction from second-last to last to add new segment
+        if (this.currentParts.length >= 2) {
+            const secondLast = this.currentParts[this.currentParts.length - 2];
+            if (tail.x === secondLast.x) {
+                // Vertical movement
+                if (tail.y > secondLast.y) {
+                    newSegment = new Point(tail.x, tail.y + 1);
+                } else {
+                    newSegment = new Point(tail.x, tail.y - 1);
+                }
+            } else {
+                // Horizontal movement
+                if (tail.x > secondLast.x) {
+                    newSegment = new Point(tail.x + 1, tail.y);
+                } else {
+                    newSegment = new Point(tail.x - 1, tail.y);
+                }
+            }
+        } else {
+            // If only head exists, add segment based on direction
+            switch (this.direction) {
+                case Direction.Up:
+                    newSegment = new Point(tail.x, tail.y + 1);
+                    break;
+                case Direction.Down:
+                    newSegment = new Point(tail.x, tail.y - 1);
+                    break;
+                case Direction.Left:
+                    newSegment = new Point(tail.x + 1, tail.y);
+                    break;
+                case Direction.Right:
+                    newSegment = new Point(tail.x - 1, tail.y);
+                    break;
+            }
+        }
+        
+        this.currentParts.push(newSegment);
+    }
+
+    /**
+     * Checks if this snake collides with another actor
+     * @param other - The other actor to check collision with
+     * @returns True if collided, false otherwise
+     */
+    didCollide(other: IActor): boolean {
+        // Handle collision with non-snake actors (like food)
+        if (other.type !== "snake") {
+            const otherPos = (other as any).position;
+            return this.getHeadPosition().equals(otherPos);
+        }
+        
+        // Handle collision with other snakes
+        const otherSnake = other as Snake;
+        const head = this.getHeadPosition();
+        const otherParts = otherSnake.getAllParts();
+        
+        for (const part of otherParts) {
             if (head.equals(part)) {
                 return true;
             }
