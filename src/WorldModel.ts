@@ -1,8 +1,10 @@
-import { Snake } from './Snake';
+import { IActor } from './IActor';
 import { IWorldView } from './IWorldView';
+import { ArrayIterator } from './ArrayIterator';
+import { ActorCollisionHandlers } from './ActorCollisionHandlers';
 
 /**
- * Represents the game world containing multiple snakes and views
+ * Represents the game world containing multiple actors and views
  * Manages game state and collision detection
  */
 export class WorldModel {
@@ -12,25 +14,29 @@ export class WorldModel {
     /** Height of the world in grid units */
     public readonly height: number = 20;
     
-    /** Collection of snakes in the world */
-    private allSnakes: Snake[] = [];
+    /** Collection of actors in the world */
+    private actors: IActor[] = [];
     
     /** Collection of views attached to this world */
     private allViews: IWorldView[] = [];
+    
+    /** Collision handler registry */
+    private collisionHandlers: ActorCollisionHandlers;
 
     /**
      * Creates a new WorldModel
+     * @param aca - ActorCollisionHandlers instance for handling collisions
      */
-    constructor() {
-        // No parameters needed - snakes and views are added via methods
+    constructor(aca: ActorCollisionHandlers) {
+        this.collisionHandlers = aca;
     }
 
     /**
-     * Adds a snake to the world
-     * @param snake - The snake to add
+     * Adds an actor to the world
+     * @param actor - The actor to add
      */
-    addSnake(snake: Snake): void {
-        this.allSnakes.push(snake);
+    addActor(actor: IActor): void {
+        this.actors.push(actor);
     }
 
     /**
@@ -42,59 +48,64 @@ export class WorldModel {
     }
 
     /**
-     * Gets all snakes in the world
-     * @returns Array of all snakes
+     * Gets an iterator over all actors
+     * @returns ArrayIterator for actors
      */
-    getAllSnakes(): Snake[] {
-        return [...this.allSnakes]; // Return a copy to prevent external modification
+    getActors(): ArrayIterator<IActor> {
+        return new ArrayIterator(this.actors);
     }
 
     /**
      * Updates the world state
-     * Moves all snakes, checks for collisions, removes dead snakes,
+     * Updates all actors, checks for collisions, removes dead actors,
      * and refreshes all views
      */
     update(): void {
-        // Move all snakes
-        for (const snake of this.allSnakes) {
-            snake.move();
+        // Update all actors
+        const actorIterator = this.getActors();
+        let result = actorIterator.next();
+        while (!result.done) {
+            const actor = result.value;
+            if (actor) {
+                actor.update();
+            }
+            result = actorIterator.next();
         }
         
-        // Check for collisions and collect snakes to remove
-        const snakesToRemove: Snake[] = [];
+        // Check for collisions and collect actors to remove
+        const actorsToRemove: IActor[] = [];
         
-        // Check each pair of snakes for collisions
-        for (let i = 0; i < this.allSnakes.length; i++) {
-            const snakeA = this.allSnakes[i];
+        // Check each pair of actors for collisions
+        for (let i = 0; i < this.actors.length; i++) {
+            const actorA = this.actors[i];
             
-            // Check self-collision
-            if (snakeA.didCollideWithSelf()) {
-                if (!snakesToRemove.includes(snakeA)) {
-                    snakesToRemove.push(snakeA);
-                }
-                continue; // Skip other checks if already colliding with self
-            }
-            
-            // Check collisions with other snakes
-            for (let j = 0; j < this.allSnakes.length; j++) {
-                if (i === j) continue; // Skip self
-                
-                const snakeB = this.allSnakes[j];
-                
-                // Check if snakeA's head collides with snakeB
-                if (snakeA.didCollide(snakeB)) {
-                    if (!snakesToRemove.includes(snakeA)) {
-                        snakesToRemove.push(snakeA);
+            // Only check collisions for ICollidable actors
+            if (this.isCollidable(actorA)) {
+                for (let j = 0; j < this.actors.length; j++) {
+                    if (i === j) continue;
+                    const actorB = this.actors[j];
+                    
+                    if (this.isCollidable(actorB) && (actorA as any).didCollide(actorB)) {
+                        // Apply collision action
+                        this.collisionHandlers.applyCollisionAction(actorA, actorB);
+                        
+                        // Mark for removal if no longer active
+                        if (!(actorA as any).isActive && !actorsToRemove.includes(actorA)) {
+                            actorsToRemove.push(actorA);
+                        }
+                        if (!(actorB as any).isActive && !actorsToRemove.includes(actorB)) {
+                            actorsToRemove.push(actorB);
+                        }
                     }
                 }
             }
         }
         
-        // Remove collided snakes
-        for (const snakeToRemove of snakesToRemove) {
-            const index = this.allSnakes.indexOf(snakeToRemove);
+        // Remove inactive actors
+        for (const actorToRemove of actorsToRemove) {
+            const index = this.actors.indexOf(actorToRemove);
             if (index !== -1) {
-                this.allSnakes.splice(index, 1);
+                this.actors.splice(index, 1);
             }
         }
         
@@ -102,5 +113,14 @@ export class WorldModel {
         for (const view of this.allViews) {
             view.display(this);
         }
+    }
+    
+    /**
+     * Type guard to check if an actor is collidable
+     * @param actor - The actor to check
+     * @returns True if the actor has didCollide method
+     */
+    private isCollidable(actor: IActor): boolean {
+        return typeof (actor as any).didCollide === 'function';
     }
 }
