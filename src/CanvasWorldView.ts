@@ -1,4 +1,4 @@
-import { IWorldView } from './IWorldView';
+ import { IWorldView } from './IWorldView';
 import { WorldModel } from './WorldModel';
 import { Snake } from './Snake';
 
@@ -40,38 +40,51 @@ export class CanvasWorldView implements IWorldView {
         this.context.fillStyle = "white";
         this.context.fillRect(0, 0, this.worldCanvas.width, this.worldCanvas.height);
 
-        // Get all snakes from the model
-        const snakes = model.getAllSnakes();
+        // Get iterator over all actors
+        const actorsIterator = model.getActors();
+        let result = actorsIterator.next();
         
-        // Draw each snake
-        snakes.forEach((snake, index) => {
-            // Different colors for different snakes
-            const colors = ["green", "blue", "red", "orange", "purple"];
-            const snakeColor = colors[index % colors.length];
+        while (!result.done) {
+            const actor = result.value;
+            // Only render snakes (we can extend to render food later)
+            if (actor && actor.type === "snake") {
+                const snake = actor as Snake;
+                if (snake.isActive) {
+                    this.drawSnake(snake);
+                }
+            }
+            result = actorsIterator.next();
+        }
+    }
+    
+    /**
+     * Draws a single snake on the canvas
+     * @param snake - The snake to draw
+     */
+    private drawSnake(snake: Snake): void {
+        const parts = snake.getAllParts();
+        const snakeColor = "green";
+        
+        parts.forEach((part, partIndex) => {
+            // Head is slightly darker
+            const color = partIndex === 0 ? this.darkenColor(snakeColor) : snakeColor;
             
-            // Draw each part of the snake
-            const parts = snake.getAllParts();
-            parts.forEach((part, partIndex) => {
-                // Head is slightly darker
-                const color = partIndex === 0 ? this.darkenColor(snakeColor) : snakeColor;
-                
-                this.context.fillStyle = color;
-                this.context.fillRect(
-                    part.x * this.scalingFactor,
-                    part.y * this.scalingFactor,
-                    this.scalingFactor,
-                    this.scalingFactor
-                );
-                
-                // Add a border to each segment for better visibility
-                this.context.strokeStyle = "black";
-                this.context.strokeRect(
-                    part.x * this.scalingFactor,
-                    part.y * this.scalingFactor,
-                    this.scalingFactor,
-                    this.scalingFactor
-                );
-            });
+            this.context.fillStyle = color;
+            this.context.fillRect(
+                part.x * this.scalingFactor,
+                part.y * this.scalingFactor,
+                this.scalingFactor,
+                this.scalingFactor
+            );
+            
+            // Add a border to each segment for better visibility
+            this.context.strokeStyle = "black";
+            this.context.strokeRect(
+                part.x * this.scalingFactor,
+                part.y * this.scalingFactor,
+                this.scalingFactor,
+                this.scalingFactor
+            );
         });
     }
     
@@ -81,7 +94,6 @@ export class CanvasWorldView implements IWorldView {
      * @returns Darkened color
      */
     private darkenColor(color: string): string {
-        // Simple color darkening - in production you might want a more robust solution
         switch(color) {
             case "green": return "darkgreen";
             case "blue": return "darkblue";
